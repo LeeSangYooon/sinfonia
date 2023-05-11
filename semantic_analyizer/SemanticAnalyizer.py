@@ -3,8 +3,6 @@ from .AST.AST import ASTNode
 import semantic_analyizer.AST.ASTNodes as AST
 from typing import List
 
-
-
 def semantic_analyze(root_node: Parser.ProgContext) -> AST.ProgramNode:
     first_nodes:List[Parser.FirstContext] = []
     for first in root_node.first():
@@ -39,8 +37,8 @@ def class_decl_ast(class_decl_node: Parser.Class_declContext) -> AST.ClassDeclNo
             var_decl_node: Parser.Var_declContext
             class_var_decls.append(var_decl_ast(var_decl_node=var_decl_node))
 
-
-    return
+    class_decl_node_ast = AST.ClassDeclNode(funcs=func_decls, vars=class_var_decls)
+    return class_decl_node_ast
 
 def func_decl_ast(first: Parser.Func_declContext) -> AST.FuncDeclNode:
     return
