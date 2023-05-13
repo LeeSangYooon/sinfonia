@@ -26,17 +26,31 @@ statement: var_decl
     |(func_call ';')
     |set_stat;
 
-var_decl: ID ID ('=' expr)? ';';
+var_decl: 'let' ID ID ('=' expr)? ';';
 if_stat: 'if' expr block;
-for_stat: 'for' ID expr block;
+for_stat: 'for' expr 'in' expr block;
 while_stat: 'while' expr block;
 set_stat: expr '=' expr ';';
 
-expr     : multExpr (('+' | '-') multExpr)* ;
+
+// Define a new rule for logical operations
+condition: term (OR term)*;
+term: factor (AND factor)*;
+factor: comparison | '(' condition ')' /* | expr */;
+comparison: expr COMPARISON_OPERATOR expr;
+AND: 'and';
+OR: 'or';
+COMPARISON_OPERATOR: '<=' | '>=' | '<' | '>' | '==';
+
+
+condition_value: ('('  condition ')');
+
+
+expr     : (multExpr (('+' | '-') multExpr)*); //added
 multExpr : atom ('*' atom)* ;
 atom: literal
-    | ID
-    | '(' expr ')'
+    | '(' expr ')' 
+    | condition_value
     | func_call
     | class_object
     ;

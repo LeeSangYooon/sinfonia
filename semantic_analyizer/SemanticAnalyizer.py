@@ -23,6 +23,14 @@ def semantic_analyze(root_node: Parser.ProgContext) -> AST.ProgramNode:
     program_node = AST.ProgramNode(first_nodes=first_nodes)
     return program_node
 
+def block_ast(block_node: Parser.BlockContext) -> AST.BlockNode:
+    statements: List[AST.StatementNode] = []
+    
+    for statement in block_node.statement():
+        statement: Parser.StatementContext
+        statements.append(statement_ast(statement))
+    
+    return AST.BlockNode(statements=statements)
 
 def class_decl_ast(class_decl_node: Parser.Class_declContext) -> AST.ClassDeclNode:
     func_decls: List[AST.FuncDeclNode] = []
@@ -53,14 +61,8 @@ def func_decl_ast(func_decl_node: Parser.Func_declContext) -> AST.FuncDeclNode:
     #print(input_types, output_type)
     
     # function body
-    statements: List[AST.StatementNode] = []
-    block_node: Parser.BlockContext = func_decl_node.block()
-    
-    for statement in block_node.statement():
-        statement: Parser.StatementContext
-        statements.append(statement_ast(statement))
-    
-    func_decl_node_ast = AST.FuncDeclNode(func_type=func_type_node_ast, statements=statements)
+    block_node = block_ast(func_decl_node.block())
+    func_decl_node_ast = AST.FuncDeclNode(func_type=func_type_node_ast, block=block_node)
     return func_decl_node_ast
 
 
@@ -96,27 +98,117 @@ def statement_ast(statement_node: Parser.StatementContext) -> AST.StatementNode:
         return set_stat_ast(statement_node.set_stat())
     return
 
+
+
 def if_stat_ast(if_stat_node: Parser.If_statContext) -> AST.IfStatNode:
+    expr = expr_ast(if_stat_node.expr())
+    block = block_ast(if_stat_node.block())
+
+    if_stat_node_ast = AST.IfStatNode(expr, block)
+    return if_stat_node_ast
+
+def for_stat_ast(for_stat_node: Parser.For_statContext) -> AST.ForStatNode:
+    counter_var_expr, expr = map(expr_ast, for_stat_node.expr())
+    body = block_ast(for_stat_node.block())
     
-    return
+    return AST.ForStatNode(counter_var_expr, expr, body)
 
-def for_stat_ast(for_stat_ast: Parser.For_statContext) -> AST.ForStatNode:
-    return
+def while_stat_ast(while_stat_node: Parser.While_statContext) -> AST.WhileStatNode:
+    condition = expr_ast(while_stat_node.expr())
+    block = block_ast(while_stat_node.block())
+    return AST.WhileStatNode(condition, block)
 
-def while_stat_ast(while_stat_ast: Parser.While_statContext) -> AST.WhileStatNode:
-    return
+def func_call_ast(func_call_node: Parser.Func_callContext) -> AST.FuncCallNode:
+    func_name: str = str(func_call_node.ID())
+    inputs = func_call_node.expr()
+    if inputs is None: inputs = []
+    if type(inputs) is not list: inputs = list(inputs)
+    inputs: List[AST.ExprNode] = list(map(expr_ast, inputs))
 
-def func_call_ast(func_call_ast: Parser.Func_callContext) -> AST.FuncCallNode:
-    return
+    func_call_node_ast = AST.FuncCallNode(func_name, inputs)
+    return func_call_node_ast
 
-def set_stat_ast(set_stat_ast: Parser.Set_statContext) -> AST.SetStatNode:
+def set_stat_ast(set_stat_node: Parser.Set_statContext) -> AST.SetStatNode:
+    left, right = map(expr_ast, set_stat_node.expr())
+    set_stat_node_ast = AST.SetStatNode(left, right)
+    return set_stat_node_ast
 
-    return
-
-
+# 다항식
 def expr_ast(expr_node: Parser.ExprContext) -> AST.ExprNode:
-    multExprNodes = expr_node.multExpr()
-    if type(multExprNodes) != list: multExprNodes = [multExprNodes]
-    operators = expr_node.getTokens()
-    print(operators)
+    mult_expr_nodes: List[Parser.MultExprContext] = expr_node.multExpr()
+    if type(mult_expr_nodes) != list: mult_expr_nodes = [mult_expr_nodes]
+    mult_expr_nodes = list(map(mult_expr_ast, mult_expr_nodes))
+
+    operators: List[str] = []
+    children = expr_node.children
+    for child in children:
+        if type(child) == TerminalNodeImpl:
+            operators.append(str(child))
+    if len(operators) + 1 != len(mult_expr_nodes):
+        raise ValueError("연산자와 대상의 개수가 잘못됨")
+    
+    expr_node_ast = AST.ExprNode(mult_expr_nodes=mult_expr_nodes, operators=operators)
+    return expr_node_ast
+
+# 단항식
+def mult_expr_ast(mult_expr_node: Parser.MultExprContext) -> AST.MultExprNode:
+    atoms: List[Parser.AtomContext] = mult_expr_node.atom()
+    if type(atoms) != list: atoms = list(atoms)
+    atoms = list(map(atom_ast, atoms))
+    mult_expr_node_ast = AST.MultExprNode(atoms=atoms)
+    return mult_expr_node_ast
+
+# 단항식의 원소
+def atom_ast(atom_node: Parser.AtomContext) -> AST.AtomNode:
+    if atom_node.literal():
+        return literal_ast(atom_node.literal())
+    if atom_node.expr():
+        return expr_ast(atom_node.expr())
+    if atom_node.func_call():
+        return func_call_ast(atom_node.func_call())
+    if atom_node.class_object():
+        return class_object_ast(atom_node.class_object())
+    if atom_node.condition_value():
+        return condition_ast(atom_node.condition_value())
+    raise ValueError("Atom Error")
+    
+
+def literal_ast(literal_node: Parser.LiteralContext) -> AST.LiteralNode:
+    if literal_node.INT():
+        return AST.IntLiteralNode(number = int(str(literal_node.INT())))
     return
+
+# A.b.c 꼴
+def class_object_ast(class_object_node: Parser.Class_objectContext) -> AST.ClassObjectNode:
+    children = class_object_node.children
+    if len(children) % 2 == 0: raise ValueError("객체 호출 오류")
+    sequence: List[str] = []
+    for i in range(0, len(children), 2):
+        sequence.append(str(children[i]))
+    class_object_node_ast = AST.ClassObjectNode(sequence=sequence)
+    return class_object_node_ast
+
+def condition_ast(condition_value_node: Parser.Condition_valueContext) -> AST.ConditionNode:
+    condition: Parser.ConditionContext = condition_value_node.condition()
+    terms = condition.term()
+    if type(terms) is not list: terms = [terms]
+    terms = list(map(term_ast, terms))
+    return AST.ConditionNode(terms)
+
+def term_ast(term_node : Parser.TermContext) -> AST.TermNode:
+    factors = term_node.factor()
+    if type(factors) is not list: factors = [factors]
+    factors = list(map(factor_ast, factors))
+    return AST.TermNode(factors=factors)
+
+def factor_ast(factor_node: Parser.FactorContext) -> AST.FactorNode:
+    if factor_node.comparison():
+        return AST.FactorNode(comparison=comparison_ast(factor_node.comparison()))
+    if factor_node.condition():
+        return AST.FactorNode(condition=condition_ast(factor_node.condition()))
+    raise ValueError("factor error")
+
+def comparison_ast(comparison_node: Parser.ComparisonContext) -> AST.ComparisonNode:
+    left, right = map(expr_ast, comparison_node.expr())
+    operator = str(comparison_node.COMPARISON_OPERATOR())
+    return AST.ComparisonNode(operator, left, right)

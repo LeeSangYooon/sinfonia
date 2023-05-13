@@ -134,6 +134,51 @@ class ProgramListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ProgramParser#condition.
+    def enterCondition(self, ctx:ProgramParser.ConditionContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#condition.
+    def exitCondition(self, ctx:ProgramParser.ConditionContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#term.
+    def enterTerm(self, ctx:ProgramParser.TermContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#term.
+    def exitTerm(self, ctx:ProgramParser.TermContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#factor.
+    def enterFactor(self, ctx:ProgramParser.FactorContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#factor.
+    def exitFactor(self, ctx:ProgramParser.FactorContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#comparison.
+    def enterComparison(self, ctx:ProgramParser.ComparisonContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#comparison.
+    def exitComparison(self, ctx:ProgramParser.ComparisonContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#condition_value.
+    def enterCondition_value(self, ctx:ProgramParser.Condition_valueContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#condition_value.
+    def exitCondition_value(self, ctx:ProgramParser.Condition_valueContext):
+        pass
+
+
     # Enter a parse tree produced by ProgramParser#expr.
     def enterExpr(self, ctx:ProgramParser.ExprContext):
         pass

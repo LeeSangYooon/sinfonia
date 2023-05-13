@@ -1,6 +1,7 @@
 from .AST import ASTNode
 from typing import List
 from .StatementNodes import *
+from .ExprNodes import *
 
 class FirstNode(ASTNode):
     def __init__(self) -> None:
@@ -19,15 +20,13 @@ class FuncTypeNode(ASTNode):
         super().__init__()
 
 
-class ExprNode(ASTNode):
-    def __init__(self) -> None:
-        super().__init__()
+
 
 
 class FuncDeclNode(FirstNode):
-    def __init__(self, func_type: FuncTypeNode, statements: List[StatementNode]) -> None:
+    def __init__(self, func_type: FuncTypeNode, block: BlockNode) -> None:
         self.func_type: FuncTypeNode = func_type
-        self.statements: List[StatementNode] = statements
+        self.block: BlockNode = block
         super().__init__()
     
 
