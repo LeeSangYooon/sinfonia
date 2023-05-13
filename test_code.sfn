@@ -11,5 +11,6 @@ class Position {
     init x y {
         this.x = x;
         this.y = y;
+        int c = 12 * 320 + this.y * 13 - 2 * 4 + 1;
     }
 }

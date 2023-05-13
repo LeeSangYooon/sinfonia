@@ -10,5 +10,7 @@ if __name__ == "__main__":
     ast: AST.ProgramNode = semantic_analyze(tree)
     machine_code: MachineCode = generate_machine_code(ast)
     print(machine_code)
+    a = []
+    a[1]
 
 #print(tree.toStringTree(recog=parser))
