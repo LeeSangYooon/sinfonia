@@ -47,7 +47,7 @@ condition_value: ('('  condition ')');
 
 
 expr     : (multExpr (('+' | '-') multExpr)*); //added
-multExpr : atom ('*' atom)* ;
+multExpr : atom (('*' | '/') atom)* ;
 atom: literal
     | '(' expr ')' 
     | condition_value
@@ -58,8 +58,9 @@ atom: literal
 func_call: ID (expr)*;
 class_object: ID ('.' ID)+;
  
-literal : INT;
-ID      : [a-zA-Z]+ ;
+literal : INT | STR;
+ID      : [a-zA-Z_]+[0-9_]* ;
 INT     : [0-9]+ ;
+STR     : '"' .*? '"';
 NEWLINE : '\r'? '\n' -> skip;
 WS      : [ \t]+ -> skip ;

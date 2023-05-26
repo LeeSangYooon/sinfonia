@@ -1,0 +1,47 @@
+@to_str {
+    # none -> str
+    to_str;
+}
+
+@to_str
+class int {
+
+    # none -> str
+    to_str {
+
+    }
+}
+
+# @to_str -> str
+to_str object {
+    return object.to_str;
+}
+
+class list { 
+    
+    # none -> str 
+    to_str {
+        let str ans = "";
+        for item in this {
+            ans = ans + to_str item;
+        }
+        return ans;
+    }
+}
+
+
+class Person {
+    int age;
+    str name;
+    
+    # int str -> none
+    init age name {
+        this.age = age;
+        this.name = name;
+    }
+
+    # none -> none
+    introduce {
+        print ["I'm " this.name " and " this.age "years old"];
+    }
+}

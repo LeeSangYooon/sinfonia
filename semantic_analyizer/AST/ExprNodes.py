@@ -17,6 +17,11 @@ class IntLiteralNode(LiteralNode):
         self.number = number
         super().__init__()
 
+class StrLiteralNode(LiteralNode):
+    def __init__(self, string: str) -> None:
+        self.string = string
+        super().__init__()
+
 class ClassObjectNode(AtomNode):
     def __init__(self, sequence: List[str]) -> None:
         self.sequence = sequence
@@ -25,8 +30,9 @@ class ClassObjectNode(AtomNode):
 
 
 class MultExprNode(ASTNode):
-    def __init__(self, atoms: AtomNode) -> None:
+    def __init__(self, atoms: AtomNode, operators: List[str]) -> None:
         self.atoms = atoms
+        self.operators = operators
         super().__init__()
 
 class ExprNode(ASTNode):

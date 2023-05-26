@@ -59,10 +59,12 @@ def func_decl_ast(func_decl_node: Parser.Func_declContext) -> AST.FuncDeclNode:
     *input_types, output_type = list(map(lambda x: x.getText(), types))
     func_type_node_ast = AST.FuncTypeNode(input_types=input_types, output_type=output_type)
     #print(input_types, output_type)
-    
+    #func_name
+    head: Parser.Func_headContext = func_decl_node.func_head()
+    name, *args = map(str, head.ID())
     # function body
     block_node = block_ast(func_decl_node.block())
-    func_decl_node_ast = AST.FuncDeclNode(func_type=func_type_node_ast, block=block_node)
+    func_decl_node_ast = AST.FuncDeclNode(func_type=func_type_node_ast, block=block_node, name=name, args= args)
     return func_decl_node_ast
 
 
@@ -155,7 +157,16 @@ def mult_expr_ast(mult_expr_node: Parser.MultExprContext) -> AST.MultExprNode:
     atoms: List[Parser.AtomContext] = mult_expr_node.atom()
     if type(atoms) != list: atoms = list(atoms)
     atoms = list(map(atom_ast, atoms))
-    mult_expr_node_ast = AST.MultExprNode(atoms=atoms)
+
+    operators: List[str] = []
+    children = mult_expr_node.children
+    for child in children:
+        if type(child) == TerminalNodeImpl:
+            operators.append(str(child))
+    if len(operators) + 1 != len(atoms):
+        raise ValueError("연산자와 대상의 개수가 잘못됨")
+
+    mult_expr_node_ast = AST.MultExprNode(atoms=atoms, operators=operators)
     return mult_expr_node_ast
 
 # 단항식의 원소
@@ -176,6 +187,8 @@ def atom_ast(atom_node: Parser.AtomContext) -> AST.AtomNode:
 def literal_ast(literal_node: Parser.LiteralContext) -> AST.LiteralNode:
     if literal_node.INT():
         return AST.IntLiteralNode(number = int(str(literal_node.INT())))
+    if literal_node.STR():
+        return AST.StrLiteralNode(string=literal_node.STR())
     return
 
 # A.b.c 꼴

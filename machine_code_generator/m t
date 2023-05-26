@@ -1,0 +1,29 @@
+# int, int -> int
+multiply a b {
+    if (b == 0) { return 0; }
+    return (a + multiply(a, b - 1));
+}
+let int a = multiply(3,5);
+print(a);
+
+# multiply a b (*0: a, *1: b) 지점 A
+put *1
+put 0
+do ==
+else skip 2  # pop도 포함
+put 0
+goback # func call stack에 last index 저장되어있고 글로 간다음 pop
+put *0
+# multiply call
+put *0
+put *1
+put 1
+do -
+func call 9 2
+do +
+goback
+
+put 3
+put 5
+func call 1 2
+do print

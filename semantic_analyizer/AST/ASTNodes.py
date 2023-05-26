@@ -24,9 +24,11 @@ class FuncTypeNode(ASTNode):
 
 
 class FuncDeclNode(FirstNode):
-    def __init__(self, func_type: FuncTypeNode, block: BlockNode) -> None:
+    def __init__(self, func_type: FuncTypeNode, block: BlockNode, name:str, args: List[str]) -> None:
         self.func_type: FuncTypeNode = func_type
+        self.name = name
         self.block: BlockNode = block
+        self.args = args
         super().__init__()
     
 

@@ -1,0 +1,52 @@
+# int -> int
+add_one num {
+    return (num + 1);
+}
+
+let int a = add_one 1;
+print a;
+
+
+기계어:
+# add_one func, 스택에 num 갖고있음, 지점 A
+put 1
++
+
+# 실행 부분
+put 1
+go A
+define a
+set a
+put a
+print
+
+
+
+
+
+
+
+# int, int -> int
+multiply a b {
+    if (b == 0) { return 0; }
+    return (a + multiply(a, b - 1));
+}
+
+
+# multiply a b (*0: a, *1: b) 지점 A
+put *1
+put 0
+==
+else skip 3
+pop
+put 0
+goback # func call stack에 last index 저장되어있고 글로 간다음 pop
+put *0
+# multiply call
+put *0
+put *1
+put 1
+-
+func call A
+goback
+
