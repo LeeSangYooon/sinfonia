@@ -3,6 +3,7 @@ from .AST.AST import ASTNode
 import semantic_analyizer.AST.ASTNodes as AST
 from typing import List
 from antlr4.tree.Tree import TerminalNode, TerminalNodeImpl
+from machine_code_generator.SymbolTable.Type import Type
 
 def semantic_analyze(root_node: Parser.ProgContext) -> AST.ProgramNode:
     first_nodes:List[Parser.FirstContext] = []
@@ -56,7 +57,7 @@ def func_decl_ast(func_decl_node: Parser.Func_declContext) -> AST.FuncDeclNode:
     # function type
     type_node: Parser.Func_typeContext = func_decl_node.func_type()
     types: List[TerminalNodeImpl] = type_node.ID()
-    *input_types, output_type = list(map(lambda x: x.getText(), types))
+    *input_types, output_type = list(map(lambda x: Type(x.getText()), types))
     func_type_node_ast = AST.FuncTypeNode(input_types=input_types, output_type=output_type)
     #print(input_types, output_type)
     #func_name
@@ -75,6 +76,7 @@ def var_decl_ast(var_decl_node: Parser.Var_declContext | Parser.Class_var_declCo
         var_decl_node: Parser.Var_declContext
     
     type_name, var_name, *rest  = list(map(lambda x: x.getText(), var_decl_node.ID()))
+    type_name = Type(type_name)
     
     if not class_var:
         expr_node = expr_ast(var_decl_node.expr())
@@ -120,15 +122,27 @@ def while_stat_ast(while_stat_node: Parser.While_statContext) -> AST.WhileStatNo
     block = block_ast(while_stat_node.block())
     return AST.WhileStatNode(condition, block)
 
-def func_call_ast(func_call_node: Parser.Func_callContext) -> AST.FuncCallNode:
-    func_name: str = str(func_call_node.ID())
-    inputs = func_call_node.expr()
+
+def make_func_call_tree(func, args):
+    inputs = args[-1].expr()
     if inputs is None: inputs = []
     if type(inputs) is not list: inputs = list(inputs)
     inputs: List[AST.ExprNode] = list(map(expr_ast, inputs))
 
-    func_call_node_ast = AST.FuncCallNode(func_name, inputs)
-    return func_call_node_ast
+    if len(args) == 1:
+        left_func = func
+    else:
+        left_func = make_func_call_tree(func, args[0: -1])
+
+    return AST.FuncCallNode(left_func, inputs)
+
+def func_call_ast(func_call_node: Parser.Func_callContext) -> AST.FuncCallNode:
+    func_name = class_object_ast(func_call_node.class_object())
+    # plus(1)(2)
+    args: List[Parser.Func_argsContext] = func_call_node.func_args()
+    
+
+    return make_func_call_tree(func_name, args)
 
 def set_stat_ast(set_stat_node: Parser.Set_statContext) -> AST.SetStatNode:
     left, right = map(expr_ast, set_stat_node.expr())

@@ -2,6 +2,7 @@ from .AST import ASTNode
 from typing import List
 from .StatementNodes import *
 from .ExprNodes import *
+from machine_code_generator.SymbolTable.Type import Type
 
 class FirstNode(ASTNode):
     def __init__(self) -> None:
@@ -14,9 +15,9 @@ class ProgramNode(ASTNode):
 
 
 class FuncTypeNode(ASTNode):
-    def __init__(self, input_types: List[str], output_type: str) -> None:
-        self.input_types: List[str] = input_types
-        self.output_type: str = output_type
+    def __init__(self, input_types: List[Type], output_type: Type) -> None:
+        self.input_types: List[Type] = input_types
+        self.output_type: Type = output_type
         super().__init__()
 
 
@@ -33,7 +34,7 @@ class FuncDeclNode(FirstNode):
     
 
 class VarDeclNode(ASTNode):
-    def __init__(self, type_name:str, var_name:str, expr:ExprNode = None ) -> None:
+    def __init__(self, type_name:Type, var_name:str, expr:ExprNode = None ) -> None:
         self.type_name = type_name
         self.var_name = var_name
         self.expr = expr

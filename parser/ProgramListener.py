@@ -1,6 +1,6 @@
-# Generated from Program.g4 by ANTLR 4.12.0
+# Generated from Program.g4 by ANTLR 4.13.0
 from antlr4 import *
-if __name__ is not None and "." in __name__:
+if "." in __name__:
     from .ProgramParser import ProgramParser
 else:
     from ProgramParser import ProgramParser
@@ -203,6 +203,15 @@ class ProgramListener(ParseTreeListener):
 
     # Exit a parse tree produced by ProgramParser#atom.
     def exitAtom(self, ctx:ProgramParser.AtomContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#func_args.
+    def enterFunc_args(self, ctx:ProgramParser.Func_argsContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#func_args.
+    def exitFunc_args(self, ctx:ProgramParser.Func_argsContext):
         pass
 
 

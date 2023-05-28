@@ -1,8 +1,7 @@
-from machine_code_generator.MachineCode import MachineCode
-from machine_code_generator.MachineCodeFunctions import *
+from machine_code_generator.MachineCode import *
 
 multiply_machine_code = MachineCode([
-    go(value(14)),
+    go(value(15)),
 
     put(index(1)),
     put(value(0)),

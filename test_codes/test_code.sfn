@@ -1,0 +1,7 @@
+# int, int -> int
+multiply a b {
+    if (b == 0) { return (0); }
+    return (a + multiply(a, b - 1));
+}
+let int a = multiply(16,16);
+print(a);

@@ -1,18 +1,25 @@
 from semantic_analyizer.AST.AST import ASTNode
 import semantic_analyizer.AST.ASTNodes as AST
-from .MachineCode import MachineCode
+from .MachineCode import *
 from .SymbolTable.SymbolTable import SymbolTable
-from typing import List
+from .SymbolTable.FuncSymbol import FuncSymbol
 from .SymbolTable.ObjectSymbol import ObjectSymbol
+from .SymbolTable.ClassSymbol import ClassSymbol
+from typing import List
 
 STATEMENT_CLASSESE = [AST.StatementNode, AST.IfStatNode, AST.ForStatNode, AST.WhileStatNode, AST.SetStatNode, AST.FuncCallNode, AST.VarDeclNode]
-DEFAULT_FUNCS = ['return']
+DEFAULT_FUNCS = {'return': go_back(), 'print': print_()}
+MACHINECODE_FUNC_FOR_STR = {'<' : less(), '>': greater(), '<=': less_or_equal(), '>=': greater_or_equal(), '==': equal()}
+MACHINECODE_FUNC_FOR_OPERATORS = {'+': plus(), '-': minus(), '*': multiply(), '/': divide()}
+
 symbol_table: SymbolTable
 
 def generate_machine_code(ast: AST.ProgramNode) -> MachineCode:
     global symbol_table
     machine_code = MachineCode()
     symbol_table = SymbolTable()
+
+    machine_code.append(go(value(-1)))
 
     class_definitions: List[AST.ClassDeclNode] = []
     func_definitions: List[AST.FuncDeclNode] = []
@@ -29,10 +36,18 @@ def generate_machine_code(ast: AST.ProgramNode) -> MachineCode:
             raise ValueError(type(first_node))
     
     for class_def in class_definitions:
-        symbol_table.add_class(class_def.name)
+        symbol_table.add_class(class_def.name, ClassSymbol())
     for func_def in func_definitions:
-        symbol_table.add_func(func_def.name)
+        symbol_table.add_func(func_def.name, FuncSymbol(func_def.name, func_def.func_type))
 
+
+    for func_def in func_definitions:
+        machine_code += func_decl(func_def, machine_code.lines.__len__())
+    machine_code.lines[0] = go(value(len(machine_code.lines)))
+    for statement in statements:
+        machine_code += generate_statement(statement)
+
+    machine_code.check_points()
 
     return machine_code
 
@@ -40,11 +55,21 @@ def class_decl(decl: AST.ClassDeclNode, symbol_table: SymbolTable) :
     
     return
 
-# machine_code를 직접 수정
-def func_decl(decl: AST.FuncDeclNode, machine_code):
+def func_decl(decl: AST.FuncDeclNode, line: int):
+    machine_code = MachineCode()
+
     inputs = zip(decl.args, decl.func_type.input_types)
-    symbol_table.decl_func_body(inputs)
+    symbol_table.decl_func_body(symbol_table.functions[decl.name], inputs)
+
+    block = generate_block(decl.block)
+    machine_code += block
+
     symbol_table.end_decl_func_body()
+    symbol_table.functions[decl.name].index = line
+    symbol_table.functions[decl.name].memory_size = len(decl.args)
+    
+
+    return machine_code
 
 def generate_statement(statement: AST.StatementNode):
     machine_code = MachineCode()
@@ -53,6 +78,7 @@ def generate_statement(statement: AST.StatementNode):
          (type(statement) is AST.ForStatNode, generate_for_stat), 
          (type(statement) is AST.WhileStatNode, genrate_while_stat),
          (type(statement) is AST.FuncCallNode, generate_func_call),
+         (type(statement) is AST.VarDeclNode, generate_var_decl),
     ]
     error = True
     for x in d: 
@@ -65,12 +91,15 @@ def generate_statement(statement: AST.StatementNode):
     return machine_code
 
 def generate_block(block: AST.BlockNode) -> MachineCode:
-    return sum(map(generate_statement, block.statements))
+    a = MachineCode()
+    for code in map(generate_statement, block.statements):
+        a += code
+    return a
 
 def generate_literal(literal: AST.LiteralNode) -> MachineCode:
     machine_code = MachineCode()
     if type(literal) is AST.IntLiteralNode:
-        machine_code.push(literal.number)
+        machine_code.append(put(value(literal.number)))
     if type(literal) is AST.StrLiteralNode:
         raise ValueError("not implemented")
     return machine_code
@@ -83,12 +112,41 @@ def genrate_class_object(class_object: AST.ClassObjectNode) -> MachineCode:
             parent = parent.get_var(child)
         else:
             raise ValueError("없는 걸 호출했다")
-    machine_code.push(parent.get_position())
+    machine_code.append(put(parent.get_position()))
     return machine_code
 
 def genrate_condition(condition: AST.ConditionNode) -> MachineCode:
+    machine_code = MachineCode()
+    terms: AST.TermNode = condition.terms
+    for term in terms:
+        factors: AST.FactorNode = term.factors
+        for factor in factors:
+            if factor.condition is None and factor.comparison is not None:
+                # comparison
+                comparison = factor.comparison
+                left_expr = generate_expr(comparison.left_expr)
+                right_expr = generate_expr(comparison.right_expr)
+                operater = MACHINECODE_FUNC_FOR_STR[comparison.operator]
 
-    return
+                machine_code += left_expr
+                machine_code += right_expr
+
+                machine_code.append(do(operater))
+            
+            elif factor.condition is not None and factor.comparison is None:
+                # condidion
+                return genrate_condition(factor.condition)
+            
+            else:
+                raise ValueError("Both are")
+        
+        for i in range(len(factors) - 1):
+            machine_code.append(do(and_()))
+    
+    for i in range(len(terms) - 1):
+        machine_code.append(do(or_()))
+    
+    return machine_code
 
 
 def generate_atom(atom: AST.AtomNode) -> MachineCode:
@@ -114,7 +172,7 @@ def generate_atom(atom: AST.AtomNode) -> MachineCode:
 def generate_mult_expr(mult_expr: AST.MultExprNode) -> MachineCode:
     machine_code = MachineCode()
 
-    first_node_push_code = generate_mult_expr(mult_expr=mult_expr.atoms[0])
+    first_node_push_code = generate_atom(mult_expr.atoms[0])
     machine_code += first_node_push_code
 
     for i in range(len(mult_expr.operators)):
@@ -134,26 +192,39 @@ def generate_expr(expr: AST.ExprNode) -> MachineCode:
     for i in range(len(expr.operators)):
         push_code = generate_mult_expr(expr.mult_expr_nodes[i+1])
         machine_code += push_code
-        machine_code.do(expr.operators[i])
+        machine_code.append(do(MACHINECODE_FUNC_FOR_OPERATORS[expr.operators[i]]))
 
     return machine_code
 
 
 def generate_func_call(func_call: AST.FuncCallNode):
     machine_code = MachineCode()
-    name = func_call.func_name
+
+    names = func_call.func_name.sequence
     for func_input in func_call.inputs:
         machine_code += generate_expr(func_input) # 스택에 추가하는 명령
     
-    if name in DEFAULT_FUNCS:
-        # 분기
-        if name == "return":
+    if len(names) == 1 and names[0] in DEFAULT_FUNCS:
+        if names[0] == "return":
+            machine_code.append(go_back())
             pass
         else:
-            machine_code.do(name)
+            machine_code.append(do(DEFAULT_FUNCS[names[0]]))
+    elif len(names) == 1:
+        func = symbol_table.functions[names[0]]
+        machine_code.append([MachineCode.POINT, func])
     else:
-        machine_code += symbol_table.func_use(name) # func_use 함수는 스택에서 입력값을 제거해야 함
-        return machine_code
+        parent: ObjectSymbol = symbol_table.get_object(names.sequence[0])
+        for child in names[1:-1]:
+            if parent.get_var(child):
+                parent = parent.get_var(child)
+            else:
+                raise ValueError("없는 걸 호출했다")
+
+        func:FuncSymbol = parent.get_class().get_func(names.sequence[-1])
+        machine_code.add_point(func)
+
+    return machine_code
 
 
 def generate_set_stat(set_stat: AST.SetStatNode) -> MachineCode:
@@ -166,11 +237,32 @@ def generate_set_stat(set_stat: AST.SetStatNode) -> MachineCode:
 
 def generate_if_stat(if_stat: AST.IfStatNode) -> MachineCode:
     machine_code = MachineCode()
-    machine_code += generate_expr(symbol_table.get_object(if_stat.expr))
-    machine_code.if_(generate_block(if_stat.block))
-    return
+    condition = generate_expr(if_stat.expr)
+    block = generate_block(if_stat.block)
+
+    machine_code += condition
+    block_length = len(block.lines)
+    machine_code.append(else_skip(value(block_length)))
+
+    machine_code += block
+
+    return machine_code
+
 def generate_for_stat(for_stat: AST.ForStatNode) -> MachineCode:
     
     return
 def genrate_while_stat(while_stat: AST.WhileStatNode) -> MachineCode:
     return
+
+
+
+def generate_var_decl(var_decl: AST.VarDeclNode) -> MachineCode:
+    machine_code = MachineCode()
+    var = ObjectSymbol(var_decl.var_name, var_decl.type_name) 
+    symbol_table.add_var(var_decl.var_name, var)
+
+    if var_decl.expr is not None:
+        machine_code += generate_expr(var_decl.expr)
+    
+
+    return machine_code

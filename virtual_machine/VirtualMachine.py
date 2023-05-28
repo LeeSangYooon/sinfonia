@@ -93,6 +93,7 @@ class VirtualMachine:
 
             elif self.line[0] == MachineCode.GO:
                 self.pointer = self.get_value(1)
+                continue
             
             elif self.line[0] == MachineCode.DO:
                 self.do(self.line[1])

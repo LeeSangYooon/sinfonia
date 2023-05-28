@@ -55,8 +55,9 @@ atom: literal
     | class_object
     ;
 
-func_call: ID (expr)*;
-class_object: ID ('.' ID)+;
+func_args: ('(' (expr (',' expr)*)? ')');
+func_call: class_object func_args+;
+class_object: ID ('.' ID)*;
  
 literal : INT | STR;
 ID      : [a-zA-Z_]+[0-9_]* ;
