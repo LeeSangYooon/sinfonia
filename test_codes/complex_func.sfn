@@ -1,0 +1,15 @@
+#int, int -> int
+sum a b {
+    let int i = a;
+    let int ans = 0;
+    while (i <= b) {
+        ans = ans + i;
+        i = i + 1;
+    }
+    return (ans);
+} 
+
+print(sum(1, 100000));
+print(0);
+
+

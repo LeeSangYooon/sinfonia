@@ -58,15 +58,18 @@ def class_decl(decl: AST.ClassDeclNode, symbol_table: SymbolTable) :
 def func_decl(decl: AST.FuncDeclNode, line: int):
     machine_code = MachineCode()
 
-    inputs = zip(decl.args, decl.func_type.input_types)
+    inputs = list(zip(decl.args, decl.func_type.input_types))
     symbol_table.decl_func_body(symbol_table.functions[decl.name], inputs)
+    symbol_table.functions[decl.name].index = line
+    symbol_table.functions[decl.name].memory_size = len(decl.args)
+    symbol_table.functions[decl.name].inputs = inputs
+    symbol_table.functions[decl.name].return_existence = decl.func_type.output_type.name != 'none'
 
     block = generate_block(decl.block)
     machine_code += block
 
     symbol_table.end_decl_func_body()
-    symbol_table.functions[decl.name].index = line
-    symbol_table.functions[decl.name].memory_size = len(decl.args)
+    
     
 
     return machine_code
@@ -178,7 +181,7 @@ def generate_mult_expr(mult_expr: AST.MultExprNode) -> MachineCode:
     for i in range(len(mult_expr.operators)):
         push_code = generate_atom(mult_expr.atoms[i+1])
         machine_code += push_code
-        machine_code.do(mult_expr.operators[i])
+        machine_code.append(do(MACHINECODE_FUNC_FOR_OPERATORS[mult_expr.operators[i]]))
 
     return machine_code
 
@@ -201,7 +204,10 @@ def generate_func_call(func_call: AST.FuncCallNode):
     machine_code = MachineCode()
 
     names = func_call.func_name.sequence
+
+
     for func_input in func_call.inputs:
+        
         machine_code += generate_expr(func_input) # 스택에 추가하는 명령
     
     if len(names) == 1 and names[0] in DEFAULT_FUNCS:
@@ -229,9 +235,24 @@ def generate_func_call(func_call: AST.FuncCallNode):
 
 def generate_set_stat(set_stat: AST.SetStatNode) -> MachineCode:
     machine_code = MachineCode()
-    machine_code.do(symbol_table.get_object(set_stat.left).get_position())
+    
     machine_code += generate_expr(set_stat.right)
-    machine_code.do('=')
+    left: AST.ClassObjectNode = set_stat.left
+    names = left.sequence
+    if len(names) == 1:
+        name = names[0]
+    else:
+        parent: ObjectSymbol = symbol_table.get_object(names.sequence[0])
+        for child in names[1:]:
+            if parent.get_var(child):
+                parent = parent.get_var(child)
+            else:
+                raise ValueError("없는 걸 호출했다")
+        name = parent.name
+
+    machine_code.append(set(symbol_table.get_object(name).get_position()))
+    
+    
     return machine_code
 
 
@@ -251,8 +272,18 @@ def generate_if_stat(if_stat: AST.IfStatNode) -> MachineCode:
 def generate_for_stat(for_stat: AST.ForStatNode) -> MachineCode:
     
     return
+
 def genrate_while_stat(while_stat: AST.WhileStatNode) -> MachineCode:
-    return
+    machine_code = MachineCode()
+    condition = generate_expr(while_stat.condition_expr)
+    block = generate_block(while_stat.block)
+    block_length = len(block.lines)
+
+    machine_code += condition
+    machine_code.append(else_skip(value(block_length + 1)))
+    machine_code += block
+    machine_code.append(move(value(-len(machine_code.lines))))
+    return machine_code
 
 
 

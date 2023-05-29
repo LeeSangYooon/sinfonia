@@ -46,3 +46,8 @@ class SymbolTable:
         self.objects.pop()
         self.open_func.pop()
         return
+    
+    def open_scope(self):
+        return
+    def close_scope(self):
+        return

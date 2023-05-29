@@ -61,7 +61,7 @@ def serializedATN():
         131,3,38,19,0,131,132,3,12,6,0,132,21,1,0,0,0,133,134,5,11,0,0,134,
         135,3,38,19,0,135,136,5,12,0,0,136,137,3,38,19,0,137,138,3,12,6,
         0,138,23,1,0,0,0,139,140,5,13,0,0,140,141,3,38,19,0,141,142,3,12,
-        6,0,142,25,1,0,0,0,143,144,3,38,19,0,144,145,5,9,0,0,145,146,3,38,
+        6,0,142,25,1,0,0,0,143,144,3,48,24,0,144,145,5,9,0,0,145,146,3,38,
         19,0,146,147,5,7,0,0,147,27,1,0,0,0,148,153,3,30,15,0,149,150,5,
         22,0,0,150,152,3,30,15,0,151,149,1,0,0,0,152,155,1,0,0,0,153,151,
         1,0,0,0,153,154,1,0,0,0,154,29,1,0,0,0,155,153,1,0,0,0,156,161,3,
@@ -231,7 +231,7 @@ class ProgramParser ( Parser ):
                 self.state = 55 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 117468434) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 16788754) != 0)):
                     break
 
         except RecognitionException as re:
@@ -294,7 +294,7 @@ class ProgramParser ( Parser ):
                 self.state = 58
                 self.func_decl()
                 pass
-            elif token in [8, 10, 11, 13, 14, 24, 25, 26]:
+            elif token in [8, 10, 11, 13, 24]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 59
                 self.statement()
@@ -607,7 +607,7 @@ class ProgramParser ( Parser ):
             self.state = 101
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 117468416) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 16788736) != 0):
                 self.state = 98
                 self.statement()
                 self.state = 103
@@ -1003,11 +1003,12 @@ class ProgramParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def expr(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(ProgramParser.ExprContext)
-            else:
-                return self.getTypedRuleContext(ProgramParser.ExprContext,i)
+        def class_object(self):
+            return self.getTypedRuleContext(ProgramParser.Class_objectContext,0)
+
+
+        def expr(self):
+            return self.getTypedRuleContext(ProgramParser.ExprContext,0)
 
 
         def getRuleIndex(self):
@@ -1031,7 +1032,7 @@ class ProgramParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 143
-            self.expr()
+            self.class_object()
             self.state = 144
             self.match(ProgramParser.T__8)
             self.state = 145

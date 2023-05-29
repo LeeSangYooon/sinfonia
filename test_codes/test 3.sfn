@@ -1,3 +1,32 @@
+put 1
+put 0
+put *0  # condition
+put 100
+do <=
+else skip 6
+put *1  # block
+put *0
+do +
+set *1
+move -8
+put *1
+do print
+
+GO 1
+PUT 1
+PUT 0
+PUT &0
+PUT 100
+DO LESSOREQUAL
+ELSESKIP 5
+PUT &1
+PUT &0
+DO PLUS
+SET &1
+GO 3
+PUT &1
+DO PRINT
+
 class Cell {
     bool mine;
     bool revealed;

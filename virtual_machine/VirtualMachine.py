@@ -1,5 +1,4 @@
 from machine_code_generator.MachineCode import MachineCode
-from machine_code_generator.MachineCodeFunctions import *
 
 # Virtual Machine
 class VirtualMachine:
@@ -18,7 +17,8 @@ class VirtualMachine:
         if self.pointer < len(self.code):
             self.line = self.code[self.pointer]
         else:
-            print("done")
+            pass
+            #print("done")
     
     def done(self) -> None:
         return self.pointer >= self.length
@@ -44,6 +44,14 @@ class VirtualMachine:
             print(self.stack.pop())
         elif operation == MachineCode.EQUAL:
             self.stack.append(self.stack.pop() == self.stack.pop())
+        elif operation == MachineCode.LESS:
+            self.stack.append(self.stack.pop() > self.stack.pop())
+        elif operation == MachineCode.GREATER:
+            self.stack.append(self.stack.pop() < self.stack.pop())
+        elif operation == MachineCode.LESSOREQUAL:
+            self.stack.append(self.stack.pop() >= self.stack.pop())
+        elif operation == MachineCode.GREATEROREQUAL:
+            self.stack.append(self.stack.pop() <= self.stack.pop())
         else:
             raise ValueError("not implemented")
 
@@ -55,6 +63,8 @@ class VirtualMachine:
         self.stack =[]
         self.call_stack = []
         self.args_stack = []
+        self.func_memory = []
+        self.func_return_existence = []
         self.memory_pivot = [0]
         self.pointer = 0
         self.line = self.code[0]
@@ -67,6 +77,9 @@ class VirtualMachine:
             elif self.line[0] == MachineCode.POP:
                 self.stack.pop()
 
+            elif self.line[0] == MachineCode.SET:
+                self.stack[self.line[2] + self.memory_pivot[-1]] = self.stack.pop()
+
             
             elif self.line[0] == MachineCode.ELSESKIP:
                 if not self.is_true(self.stack.pop()):
@@ -74,21 +87,29 @@ class VirtualMachine:
 
             elif self.line[0] == MachineCode.GOBACK:
                 # 함수 입력값 제거
-                top = self.stack.pop()
-                for i in range(self.args_stack.pop()):
-                    self.stack.pop()
-                self.stack.append(top)
+                if self.func_return_existence[-1]:
+                    top = self.stack.pop() # 함수 리턴값
+                    for i in range(self.func_memory.pop()):
+                        self.stack.pop()
+                    self.stack.append(top)
+                else:
+                    for i in range(self.func_memory.pop()):
+                        self.stack.pop()
 
 
                 self.pointer = self.call_stack.pop()
                 self.memory_pivot.pop()
+                self.func_return_existence.pop()
+                self.args_stack.pop()
                 continue
 
             elif self.line[0] == MachineCode.FUNCCALL:
                 self.call_stack.append(self.pointer + 1)
-                self.pointer = self.get_value(1)
-                self.memory_pivot.append(len(self.stack) - self.get_value(3))
-                self.args_stack.append(self.get_value(3))
+                self.pointer = self.line[1]
+                self.memory_pivot.append(len(self.stack) - self.line[2])
+                self.args_stack.append(self.line[2])
+                self.func_memory.append(self.line[3])
+                self.func_return_existence.append(self.line[4])
                 continue
 
             elif self.line[0] == MachineCode.GO:

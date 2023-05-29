@@ -30,7 +30,7 @@ var_decl: 'let' ID ID ('=' expr)? ';';
 if_stat: 'if' expr block;
 for_stat: 'for' expr 'in' expr block;
 while_stat: 'while' expr block;
-set_stat: expr '=' expr ';';
+set_stat: class_object '=' expr ';';
 
 
 // Define a new rule for logical operations

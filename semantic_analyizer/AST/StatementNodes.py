@@ -33,14 +33,13 @@ class WhileStatNode(StatementNode):
 
 
 class SetStatNode(StatementNode):
-    def __init__(self, left: ExprNode, right: ExprNode) -> None:
+    def __init__(self, left, right: ExprNode) -> None:
         self.left = left
         self.right = right
         super().__init__()
 
-# 다중상속 해야됨
 class FuncCallNode(StatementNode):
-    def __init__(self, func_name: str, inputs:List[ExprNode]) -> None:
+    def __init__(self, func_name, inputs:List[ExprNode]) -> None:
         self.func_name = func_name
         self.inputs = inputs
         super().__init__()

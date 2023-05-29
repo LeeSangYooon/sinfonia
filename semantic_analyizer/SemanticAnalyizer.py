@@ -145,7 +145,7 @@ def func_call_ast(func_call_node: Parser.Func_callContext) -> AST.FuncCallNode:
     return make_func_call_tree(func_name, args)
 
 def set_stat_ast(set_stat_node: Parser.Set_statContext) -> AST.SetStatNode:
-    left, right = map(expr_ast, set_stat_node.expr())
+    left, right = class_object_ast(set_stat_node.class_object()), expr_ast(set_stat_node.expr())
     set_stat_node_ast = AST.SetStatNode(left, right)
     return set_stat_node_ast
 

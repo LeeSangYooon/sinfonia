@@ -1,0 +1,11 @@
+# int, int -> int
+multiply a b {
+    if (b == 0) { return (0); }
+    return (a + multiply(a, b - 1));
+}
+let int a = multiply(2, multiply(2,8) - 1);
+let int b = a - 15;
+let int c = 20;
+let int ans = b + c;
+print(ans);
+print( 100 + 100);

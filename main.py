@@ -4,9 +4,7 @@ from semantic_analyizer.SemanticAnalyizer import semantic_analyze, AST
 from machine_code_generator.MachineCode import MachineCode
 from machine_code_generator.MachineCodeGenerator import generate_machine_code
 import virtual_machine.VirtualMachine as VM
-from machine_code_generator.MachineCodeFunctions import *
-from test_codes.SampleCode import multiply_machine_code
-
+from utility.Timer import timer
 
 
 
