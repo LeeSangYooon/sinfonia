@@ -12,9 +12,11 @@ class BlockNode(ASTNode):
         super().__init__()
 
 class IfStatNode(StatementNode):
-    def __init__(self, expr: ExprNode, block: BlockNode) -> None:
+    def __init__(self, expr: ExprNode, block: BlockNode, elifs, else_: BlockNode) -> None:
         self.expr =expr
         self.block = block
+        self.elifs = elifs
+        self.else_ = else_
         super().__init__()  
 
 
@@ -37,6 +39,7 @@ class SetStatNode(StatementNode):
         self.left = left
         self.right = right
         super().__init__()
+
 
 class FuncCallNode(StatementNode):
     def __init__(self, func_name, inputs:List[ExprNode]) -> None:

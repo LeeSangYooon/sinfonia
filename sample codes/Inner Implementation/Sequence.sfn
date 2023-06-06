@@ -1,0 +1,36 @@
+import Iterable
+
+#for T
+#in Iterable<T>
+class Sequence {
+    T first_term;
+    LinkedList<T> list;
+    T last_term;
+    int pointer;
+    
+    Func<T -> T> next_term;
+
+    # T, Func<T -> T>
+    init first_term next_term {
+        $first_term = first_term;
+        $last_term = first_term;
+        $next_term = next_term;
+        $list = [first_term];
+    }
+
+    #none -> none
+    start {
+        $pointer = 0;
+        $last_term = $first_term;
+    }
+
+    #none -> T
+    next {
+        $pointer += 1;
+        if ($list.len <= $pointer) {
+            $last_term = $next_term($last_term);
+            $list.append($last_term);
+        }
+        return $last_term;
+    }
+}

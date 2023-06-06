@@ -238,6 +238,22 @@ code_text.pack(side=tk.LEFT)
 code_text.bind("<Key>", on_text_modified)
 
 
+start_text = """// Sinfonia 언어 에디터
+// sample codes 파일에 샘플 코드가 있습니다.
+// 언어에 대한 내용은 레퍼런스 문서를 참조하세요.
+// 먼저 빈 .sfn 파일을 만들고 Browse버튼을 눌러 그걸 여세요
 
-# Start the Tkinter event loop
-window.mainloop()
+// Browse 버튼으로 파일 선택
+// Run 버튼으로 기계어 실행
+// Compile and Run 버튼으로 Sinfonia 코드를 컴파일하고 실행
+// Compile 버튼으로 Sinfonia 코드를 컴파일
+
+"""
+code_text.delete(1.0, tk.END) 
+code_text.insert(tk.END, start_text)
+code_text.update()
+
+def run_gui():
+    # Start the Tkinter event loop
+    window.mainloop()
+    

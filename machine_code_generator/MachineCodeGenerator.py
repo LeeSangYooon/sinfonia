@@ -1,5 +1,5 @@
-from semantic_analyizer.AST.AST import ASTNode
-import semantic_analyizer.AST.ASTNodes as AST
+from parse_tree_generator.AST.AST import ASTNode
+import parse_tree_generator.AST.ASTNodes as AST
 from .MachineCode import *
 from .SymbolTable.SymbolTable import SymbolTable
 from .SymbolTable.FuncSymbol import FuncSymbol
@@ -258,14 +258,71 @@ def generate_set_stat(set_stat: AST.SetStatNode) -> MachineCode:
 
 def generate_if_stat(if_stat: AST.IfStatNode) -> MachineCode:
     machine_code = MachineCode()
-    condition = generate_expr(if_stat.expr)
+    if type(if_stat.expr) is AST.ExprNode:
+        condition = generate_expr(if_stat.expr)
+    elif type(if_stat.expr) is AST.ConditionNode:
+        condition = genrate_condition(if_stat.expr)
+    else: raise ValueError()
+
     block = generate_block(if_stat.block)
+
+    #####
+    elif_size = 0
+    elif_conditions = []
+    elif_blocks = []
+
+    if if_stat.elifs is not None:
+        for elif_ in if_stat.elifs:
+
+            elif_:AST.IfStatNode
+            if type(elif_.expr) is AST.ExprNode:
+                cond = generate_expr(elif_.expr)
+            elif type(elif_.expr) is AST.ConditionNode:
+                cond = genrate_condition(elif_.expr)
+            else: raise ValueError()
+
+            elif_conditions.append(cond)
+            elif_size += len(cond.lines)
+
+            b = generate_block(elif_.block)
+            elif_blocks.append(b)
+            elif_size += len(b.lines)
+    
+    else_size = 0
+    else_block = MachineCode()
+
+    if if_stat.else_ is not None:
+        else_block = generate_block(if_stat.else_)
+        else_size += len(else_block.lines)
+    
+    #####
+
+    EXIT = -9999
 
     machine_code += condition
     block_length = len(block.lines)
-    machine_code.append(else_skip(value(block_length)))
+    machine_code.append(else_skip(value(block_length + 1)))
 
     machine_code += block
+    machine_code.append(EXIT)
+
+
+    for elif_condition, elif_block in zip(elif_conditions, elif_blocks):
+        machine_code += elif_condition
+        block_length = len(elif_block.lines)
+        machine_code.append(else_skip(value(block_length + 1)))
+        machine_code += elif_block
+        machine_code.append(EXIT)
+    
+    machine_code += else_block
+
+
+    size = len(machine_code.lines)
+    for i in range(size):
+        if machine_code.lines[i] == EXIT:
+            machine_code.lines[i] = move(value(size - i))
+    
+        
 
     return machine_code
 
@@ -275,7 +332,10 @@ def generate_for_stat(for_stat: AST.ForStatNode) -> MachineCode:
 
 def genrate_while_stat(while_stat: AST.WhileStatNode) -> MachineCode:
     machine_code = MachineCode()
-    condition = generate_expr(while_stat.condition_expr)
+    if type(while_stat.condition_expr) is AST.ExprNode:
+        condition = generate_expr(while_stat.condition_expr)
+    elif type(while_stat.condition_expr) is AST.ConditionNode:
+        condition = genrate_condition(while_stat.condition_expr)
     block = generate_block(while_stat.block)
     block_length = len(block.lines)
 

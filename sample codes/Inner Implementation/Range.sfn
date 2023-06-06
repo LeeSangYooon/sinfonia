@@ -1,0 +1,39 @@
+#in Iterable<int>
+#in Listable<int>
+class Range {
+    int a;
+    int b;
+
+    int counter;
+
+    # int, int -> none
+    init a b {
+        $a = a;
+        $b = b;
+    }
+
+    # int -> none
+    init b {
+        $a = 0;
+        $b = b;
+    }
+
+    # none -> int
+    start {
+        $counter = $a;
+        return 
+    }
+    # none -> T 
+    next {
+        $counter += 1;
+        if $counter < $b {
+            return $counter;
+        }
+        return null;
+    }
+
+    # none -> List<int>
+    to_list {
+        return [$a...$b-1];
+    }
+}

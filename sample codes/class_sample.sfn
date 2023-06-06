@@ -1,0 +1,17 @@
+class Person {
+    let string name;
+    let int age;
+
+    # string, int -> Person
+    init name age {
+        S.name = name;
+        S.age = age;
+        return: S;
+    } 
+    
+    # none -> none
+    sayhello {
+        print: "Hello, my name is " + S.name + " and I am " + S.age + " years old.";
+        return:;
+    }
+}

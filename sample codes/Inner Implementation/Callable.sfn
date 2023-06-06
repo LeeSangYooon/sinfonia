@@ -1,0 +1,13 @@
+form Callable {
+    #none -> none 
+    call;
+}
+
+#for T, U
+#T is Iterable
+#in Callable
+class Func<T, U> {
+    #none -> none 
+    call;
+}
+

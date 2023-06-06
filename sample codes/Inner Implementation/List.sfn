@@ -1,0 +1,94 @@
+#for T
+#in Iterable<T>
+class List<T> {
+    T first;
+    T last;
+
+    T pointer;
+    
+    int size;
+    int half_size;
+
+
+    # none -> none
+    init {
+        $size = 0;
+        $half_size = 0;
+    }
+
+    # none -> T
+    start {
+        $pointer = $first;
+        return $pointer.object;
+    }
+
+    # none -> bool
+    end {
+        return $pointer.after == null;
+    }
+
+    # none -> T
+    next {
+        $pointer = $pointer.after;
+        return $pointer.object;
+    }
+
+    # int -> T
+    get n {
+        ListNode<T> node;
+        if (n > $half_size) {
+            node = $last;
+            for i in range($size - n - 1) {
+                node = node.before;
+            }
+        }
+        else {
+            node = $first;
+            for i in range(n) {
+                node = node.after;
+            }
+        }
+        return node.object;
+    }
+
+    # T -> none
+    add object {
+        $last.after = object;
+        $size += 1;
+        $half_size = $size / 2;
+    }
+
+}
+
+
+
+#for T
+class ListNode<T> {
+    T object;
+    ListNode<T> before;
+    ListNode<T> after;
+
+    # none -> none
+    init {
+
+    }
+
+    
+}
+
+List<int> list = [1, 2, 3];
+list.add(4);
+print(list[3]);
+
+# for T
+# Iterable<T>, func<T -> none> -> none
+foreach iterable func {
+    T first = iterable.start();
+    T next = iterable.next();
+    while next != null {
+        func(next);
+        next = iterable.next();
+    }
+}
+
+foreach(list, print);

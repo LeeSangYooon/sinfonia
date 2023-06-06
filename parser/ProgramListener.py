@@ -134,6 +134,33 @@ class ProgramListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ProgramParser#assignment_stat.
+    def enterAssignment_stat(self, ctx:ProgramParser.Assignment_statContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#assignment_stat.
+    def exitAssignment_stat(self, ctx:ProgramParser.Assignment_statContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#elif.
+    def enterElif(self, ctx:ProgramParser.ElifContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#elif.
+    def exitElif(self, ctx:ProgramParser.ElifContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#else.
+    def enterElse(self, ctx:ProgramParser.ElseContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#else.
+    def exitElse(self, ctx:ProgramParser.ElseContext):
+        pass
+
+
     # Enter a parse tree produced by ProgramParser#condition.
     def enterCondition(self, ctx:ProgramParser.ConditionContext):
         pass
@@ -221,6 +248,15 @@ class ProgramListener(ParseTreeListener):
 
     # Exit a parse tree produced by ProgramParser#func_call.
     def exitFunc_call(self, ctx:ProgramParser.Func_callContext):
+        pass
+
+
+    # Enter a parse tree produced by ProgramParser#return_func.
+    def enterReturn_func(self, ctx:ProgramParser.Return_funcContext):
+        pass
+
+    # Exit a parse tree produced by ProgramParser#return_func.
+    def exitReturn_func(self, ctx:ProgramParser.Return_funcContext):
         pass
 
 

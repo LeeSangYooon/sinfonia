@@ -1,6 +1,6 @@
 from parser.Parser import parse
 from parser.ProgramParser import ProgramParser
-from semantic_analyizer.SemanticAnalyizer import semantic_analyze, AST
+from parse_tree_generator.ParseTreeGenerator import generate_parse_tree, AST
 from machine_code_generator.MachineCode import MachineCode
 from machine_code_generator.MachineCodeGenerator import generate_machine_code
 import virtual_machine.VirtualMachine as VM
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
 
     tree, parser = timer('parsing', lambda:parse(file))
-    ast: AST.ProgramNode = timer('semantic analyzing', lambda: semantic_analyze(tree))
+    ast: AST.ProgramNode = timer('semantic analyzing', lambda: generate_parse_tree(tree))
     machine_code: MachineCode = timer('generating machine code', lambda: generate_machine_code(ast))
 
     # Write the machine code to the generated file path

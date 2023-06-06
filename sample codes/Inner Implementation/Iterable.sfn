@@ -1,0 +1,40 @@
+for T
+class Iterable <T> { 
+    # none -> T: start;
+    # none -> bool: end;
+    # none -> T: next;
+}
+
+
+# for T, S
+# T < S
+# Iterable<T>, func<S, none> -> none
+foreach iterable func {
+    T first = iterable.start();
+    T next = iterable.next();
+    while (next != null) {
+        func(next);
+        next = iterable.next();
+    }
+}
+
+
+# for T, S, V
+# T < S
+# Iterable<T>, func<S, V> -> Iterable<V>
+foreach iterable func {
+    T first = iterable.start();
+    T next = iterable.next();
+    while (next != null) {
+        func(next);
+        next = iterable.next();
+    }
+}
+
+
+foreach([1,2,3], print);
+foreach(['1','2','3'], print);
+
+for i in range(100) {
+    print (i);
+}

@@ -1,0 +1,32 @@
+#int, int -> int
+sum a b {
+    int i = a;
+    int ans = 0;
+    while i <= b {
+        ans = ans + i;
+        i = i + 1;
+    }
+    return ans;
+} 
+
+
+int i = 0;
+int j = 0
+int ans = 0;
+
+while i < 100000{
+    print(i);
+    j = 0;
+    ans = 0;
+    while j <= i {
+        ans = ans + j;
+        j = j + 1;
+    }
+    print(ans);
+    i = i + 1;
+}
+
+
+
+
+

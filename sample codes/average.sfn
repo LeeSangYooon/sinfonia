@@ -1,0 +1,8 @@
+#int, int, int -> int
+average a b c {
+int sum = a + b + c;
+return (sum / 3);
+}
+print(average(100,90,98));
+
+

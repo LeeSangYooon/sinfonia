@@ -1,0 +1,8 @@
+# while문 조건문 괄호 제거
+# 주석 처리
+# if else
+
+
+# TRUE, FLASE 불리안
+# var_decl에서 expr 없는 경우도 CHECK
+

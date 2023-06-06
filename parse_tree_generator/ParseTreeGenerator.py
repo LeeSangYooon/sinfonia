@@ -1,11 +1,11 @@
 from parser.ProgramParser import ProgramParser as Parser
 from .AST.AST import ASTNode
-import semantic_analyizer.AST.ASTNodes as AST
+import parse_tree_generator.AST.ASTNodes as AST
 from typing import List
 from antlr4.tree.Tree import TerminalNode, TerminalNodeImpl
 from machine_code_generator.SymbolTable.Type import Type
 
-def semantic_analyze(root_node: Parser.ProgContext) -> AST.ProgramNode:
+def generate_parse_tree(root_node: Parser.ProgContext) -> AST.ProgramNode:
     first_nodes:List[Parser.FirstContext] = []
     for first in root_node.first():
         first: Parser.FirstContext
@@ -81,6 +81,8 @@ def var_decl_ast(var_decl_node: Parser.Var_declContext | Parser.Class_var_declCo
     if not class_var:
         expr_node = expr_ast(var_decl_node.expr())
         var_decl_node_ast = AST.VarDeclNode(type_name=type_name, var_name=var_name, expr=expr_node)
+##
+
     else:
         var_decl_node_ast = AST.VarDeclNode(type_name=type_name, var_name=var_name)
     
@@ -90,40 +92,65 @@ def var_decl_ast(var_decl_node: Parser.Var_declContext | Parser.Class_var_declCo
 def statement_ast(statement_node: Parser.StatementContext) -> AST.StatementNode:
     if statement_node.if_stat():
         return if_stat_ast(statement_node.if_stat())
-    if statement_node.var_decl():
+    elif statement_node.var_decl():
         return var_decl_ast(statement_node.var_decl())
-    if statement_node.for_stat():
+    elif statement_node.for_stat():
         return for_stat_ast(statement_node.for_stat())
-    if statement_node.while_stat():
+    elif statement_node.while_stat():
         return while_stat_ast(statement_node.while_stat())
-    if statement_node.func_call():
+    elif statement_node.func_call():
         return func_call_ast(statement_node.func_call())
-    if statement_node.set_stat():
+    elif statement_node.set_stat():
         return set_stat_ast(statement_node.set_stat())
-    return
+    elif statement_node.assignment_stat():
+        return assignment_stat_ast(statement_node.assignment_stat())
+    else:
+        raise ValueError("Statment Error")
 
 
 
-def if_stat_ast(if_stat_node: Parser.If_statContext) -> AST.IfStatNode:
-    expr = expr_ast(if_stat_node.expr())
+def if_stat_ast(if_stat_node: Parser.If_statContext, is_elif = False) -> AST.IfStatNode:
+    if if_stat_node.expr():
+        cond = expr_ast(if_stat_node.expr())
+    if if_stat_node.condition():
+        cond = condition_ast(if_stat_node.condition())
     block = block_ast(if_stat_node.block())
+    
+    elifs = None
+    if (not is_elif) and if_stat_node.elif_():
+        elifs = []
+        for elif_ in if_stat_node.elif_():
+            elifs.append(if_stat_ast(elif_, is_elif=True))
+    
+    else_ = None
+    if (not is_elif) and if_stat_node.else_():
+        else_node: Parser.ElseContext = if_stat_node.else_()
+        else_ = block_ast(else_node.block())
 
-    if_stat_node_ast = AST.IfStatNode(expr, block)
+    if_stat_node_ast = AST.IfStatNode(cond, block, elifs, else_)
     return if_stat_node_ast
 
 def for_stat_ast(for_stat_node: Parser.For_statContext) -> AST.ForStatNode:
-    counter_var_expr, expr = map(expr_ast, for_stat_node.expr())
+    counter_var_expr = expr_ast(counter_var_expr)
+    if for_stat_node.expr():
+        cond = expr_ast(for_stat_node.expr())
+    if for_stat_node.condition():
+        cond = condition_ast(for_stat_node.condition())
     body = block_ast(for_stat_node.block())
     
-    return AST.ForStatNode(counter_var_expr, expr, body)
+    return AST.ForStatNode(counter_var_expr, cond, body)
 
 def while_stat_ast(while_stat_node: Parser.While_statContext) -> AST.WhileStatNode:
-    condition = expr_ast(while_stat_node.expr())
+    if while_stat_node.expr():
+        cond = expr_ast(while_stat_node.expr())
+    if while_stat_node.condition():
+        cond = condition_ast(while_stat_node.condition())
     block = block_ast(while_stat_node.block())
-    return AST.WhileStatNode(condition, block)
+    return AST.WhileStatNode(cond, block)
 
 
 def make_func_call_tree(func, args):
+
     inputs = args[-1].expr()
     if inputs is None: inputs = []
     if type(inputs) is not list: inputs = list(inputs)
@@ -137,6 +164,12 @@ def make_func_call_tree(func, args):
     return AST.FuncCallNode(left_func, inputs)
 
 def func_call_ast(func_call_node: Parser.Func_callContext) -> AST.FuncCallNode:
+    if func_call_node.return_func() is not None:
+        return_func: Parser.Return_funcContext = func_call_node.return_func()
+        func = AST.ClassObjectNode(['return'])
+        expr = expr_ast( return_func.expr())
+        return AST.FuncCallNode(func, [expr])
+    
     func_name = class_object_ast(func_call_node.class_object())
     # plus(1)(2)
     args: List[Parser.Func_argsContext] = func_call_node.func_args()
@@ -148,6 +181,26 @@ def set_stat_ast(set_stat_node: Parser.Set_statContext) -> AST.SetStatNode:
     left, right = class_object_ast(set_stat_node.class_object()), expr_ast(set_stat_node.expr())
     set_stat_node_ast = AST.SetStatNode(left, right)
     return set_stat_node_ast
+
+def assignment_stat_ast(assignment_stat_node : Parser.Assignment_statContext) -> AST.SetStatNode:
+    left, assignment_right = class_object_ast(assignment_stat_node.class_object()), expr_ast(assignment_stat_node.expr())
+    operator = assignment_stat_node.ASSIGNMENT_OPERATOR().getText()
+    if operator == '+=':
+        operator = '+'
+    elif operator == '-=':
+        operator = '-'
+    elif operator == '*=':
+        operator = '*'
+    elif operator == '/=':
+        operator = '/'
+    else:
+        raise ValueError()
+    a, b = AST.MultExprNode([left],[]), AST.MultExprNode([assignment_right],[])
+    op = list(operator)
+    right = AST.ExprNode([a, b], op)
+    set_stat_node_ast = AST.SetStatNode(left, right)
+    return set_stat_node_ast
+
 
 # 다항식
 def expr_ast(expr_node: Parser.ExprContext) -> AST.ExprNode:
@@ -216,7 +269,10 @@ def class_object_ast(class_object_node: Parser.Class_objectContext) -> AST.Class
     return class_object_node_ast
 
 def condition_ast(condition_value_node: Parser.Condition_valueContext) -> AST.ConditionNode:
-    condition: Parser.ConditionContext = condition_value_node.condition()
+    condition = condition_value_node
+    if type(condition) is Parser.Condition_valueContext:
+        condition: Parser.ConditionContext = condition.condition()
+
     terms = condition.term()
     if type(terms) is not list: terms = [terms]
     terms = list(map(term_ast, terms))

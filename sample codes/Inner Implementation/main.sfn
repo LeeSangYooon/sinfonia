@@ -1,0 +1,10 @@
+import Sequence
+LinkedList<int> primes = {2: (n)->(n+1) }
+
+let seq = Sequence<int>(1, (int n) -> (n + 1));
+
+[2, 3, ...] = Sequence<int>(2, (int n) -> (n + 1))
+
+for i in [2,3,...] {
+    print(i);
+}
