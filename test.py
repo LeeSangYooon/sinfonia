@@ -4,7 +4,6 @@ from parse_tree_generator.ParseTreeGenerator import generate_parse_tree, AST
 from machine_code_generator.MachineCode import MachineCode
 from machine_code_generator.MachineCodeGenerator import generate_machine_code
 import virtual_machine.VirtualMachine as VM
-from utility.Timer import timer
 
 
 

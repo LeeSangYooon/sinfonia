@@ -1,0 +1,14 @@
+struct Game {
+    list<list<int>> board;
+    int lines;
+    int turn;
+}
+
+# Game -> Game
+next game {
+    Game new_game;
+    new_game.lines = game.lines
+    
+
+    return new_game;
+}

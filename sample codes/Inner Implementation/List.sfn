@@ -7,7 +7,6 @@ class List<T> {
     T pointer;
     
     int size;
-    int half_size;
 
 
     # none -> none
@@ -36,7 +35,7 @@ class List<T> {
     # int -> T
     get n {
         ListNode<T> node;
-        if (n > $half_size) {
+        if (n > $size / 2) {
             node = $last;
             for i in range($size - n - 1) {
                 node = node.before;
@@ -53,7 +52,11 @@ class List<T> {
 
     # T -> none
     add object {
-        $last.after = object;
+        ListNode<T> node;
+        node.object = object
+        node.before = $last;
+
+        $last.after = node;
         $size += 1;
         $half_size = $size / 2;
     }
@@ -68,12 +71,11 @@ class ListNode<T> {
     ListNode<T> before;
     ListNode<T> after;
 
-    # none -> none
-    init {
-
-    }
-
-    
+    # T, ListNode<T> -> none
+    init obj node {
+        $object = obj;
+        $before = node;
+    } 
 }
 
 List<int> list = [1, 2, 3];
@@ -92,3 +94,6 @@ foreach iterable func {
 }
 
 foreach(list, print);
+
+map([1,2,3,4,5], int (int n) => {n*n});
+map([1,2,3,4,5], (n)=>(n*n));

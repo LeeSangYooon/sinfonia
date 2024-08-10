@@ -1,13 +1,16 @@
-for T
+#for T
 class Iterable <T> { 
-    # none -> T: start;
-    # none -> bool: end;
-    # none -> T: next;
+    # none -> T
+    start;
+    # none -> bool
+    end;
+    # none -> T
+    next;
 }
 
 
 # for T, S
-# T < S
+# T in S
 # Iterable<T>, func<S, none> -> none
 foreach iterable func {
     T first = iterable.start();

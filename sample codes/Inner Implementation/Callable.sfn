@@ -3,8 +3,8 @@ form Callable {
     call;
 }
 
-#for T, U
-#T is Iterable
+#for T in Iterable
+#for U
 #in Callable
 class Func<T, U> {
     #none -> none 

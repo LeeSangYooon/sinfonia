@@ -1,7 +1,4 @@
-from utility.Timer import timer
-import time
 from sys import argv
-import os
 from machine_code_generator.MachineCode import MachineCode
 from virtual_machine.VirtualMachine import VirtualMachine
 
